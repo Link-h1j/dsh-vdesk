@@ -1,0 +1,12 @@
+# 实验产物与编译输出
+out/
+*.exe
+*.pdb
+*.dll
+
+# 本地/运行时
+.dsh/
+node_modules/
+token
+*.log
+*.tmp

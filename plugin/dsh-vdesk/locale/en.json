@@ -1,0 +1,22 @@
+{
+  "meta": {
+    "title": "DSH Virtual Desktop",
+    "description": "View and take over the child-session virtual desktop: start/stop, live view, mouse and keyboard."
+  },
+  "panel": {
+    "tabTitle": "Virtual desktop",
+    "guideDescription": "Start / stop · Live view · Native window",
+    "liveTitle": "Live view",
+    "liveHint": "Click / drag to control",
+    "liveFailed": "The live view failed to load (service not ready, or the stream ended).",
+    "liveRetry": "Retry",
+    "viewOnly": "View-only: takeover is off, input not sent",
+    "inputFailed": "Input failed",
+    "inputUnreachable": "Service did not respond, input not sent",
+    "actUnreachable": "Service did not respond, action not sent",
+    "actFailed": "failed",
+    "conflictRefused": "Start refused",
+    "conflictWays": "exit them first, or accept the risk with Force start",
+    "startRequested": "Accepted: starting (about 1 minute)…"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "meta": {
+    "title": "DSH 虚拟桌面",
+    "description": "在会话里查看并接管「子会话虚拟桌面」：启动/停止、实时画面、键鼠接管。"
+  },
+  "panel": {
+    "tabTitle": "虚拟桌面",
+    "guideDescription": "开启 / 关闭 · 实时画面 · 独立窗口",
+    "liveTitle": "实时画面",
+    "liveHint": "点击 / 拖拽直接操作",
+    "liveFailed": "画面加载失败（服务未就绪或流已结束）",
+    "liveRetry": "重试",
+    "viewOnly": "只读模式：尚未接管，未发送输入",
+    "inputFailed": "输入失败",
+    "inputUnreachable": "服务未响应，输入未发送",
+    "actUnreachable": "服务未响应，操作未发送",
+    "actFailed": "失败",
+    "conflictRefused": "已拒绝启动",
+    "conflictWays": "先退出它们，或点「强制启动」接受风险",
+    "startRequested": "已受理：正在启动（约 1 分钟）…"
+  }
+}

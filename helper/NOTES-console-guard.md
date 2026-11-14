@@ -1,0 +1,11 @@
+# helper 控制台会话硬闸门（P0.8）
+
+- **闸门**：启动时**在建监听之前**先取 `Process.GetCurrentProcess().SessionId`（权威值）与 `WTSQuerySessionInformation(-1, WTSWinStationName=6)` 的 winstation 名；**`sessionId <= 1` 或 `winsta == "Console"` 即拒绝服务**：stderr 打印 `vdesk-helper: REFUSED to serve in the console session (<id>, "<winsta>") -- injections would hit the real desktop; port <port> NOT bound, exiting 9.`，写 marker `served:false`，**不绑端口**，**退出码 9**。判据与 `tools/vdesk-childsession/tidy-session.ps1:68`（`$me -le 1 -or $winsta -eq 'Console'`）完全一致。
+- **逃生开关**：`VDESK_ALLOW_CONSOLE=1`（仅本机排障）→ 放行，并在 stderr 再警告一行 `serving INSIDE the console session (...); injected input will hit the REAL desktop!`。**老的 `--force` 参数不再能绕过闸门**（该分支已删除，不留后门；子会话部署本来就不用它）。
+- **可观测性**：`/health` 新增 `session:<id>` 与 `winsta:"<name>"`，以后一眼看出"连的这个 8790 到底在哪个会话"；marker 里误导人的 `session` 也从 WTS 的 0 改成权威 `Process.SessionId`（旧的 `SessionId()` 方法已删）。
+- **自测原始输出**（宿主 session 1 的 `%TEMP%` 副本；当时 8790 被测试负责人的 helper pid 17032 占着，全程没抢它）：
+  - 裸跑（无环境变量）→ `exitCode = 9`；`stderr = [vdesk-helper: REFUSED to serve in the console session (1, "Console") -- injections would hit the real desktop; port 8790 NOT bound, exiting 9. (VDESK_ALLOW_CONSOLE=1 allows it for local debugging only.)]`；跑完后 8790 **仍由对方 helper 服务**（`/health` 与之前逐字相同，`pointer:{x:5,y:5}` 不变）→ 证明它确实**没有绑端口**。marker 变 `{"served":false,"reason":"console session","winsta":"Console","session":1}`（测完已还原）。
+  - `VDESK_ALLOW_CONSOLE=1` 起在 **8795**（未占用端口，避免碰对方的 8790）→ `/health = {"ok":true,...,"session":1,"winsta":"Console","width":2560,"height":1440,"pointer":null}`；`stderr = [vdesk-helper: VDESK_ALLOW_CONSOLE=1 -- serving INSIDE the console session (1, "Console"); injected input will hit the REAL desktop!]`；同一实例无 token `/clipboard` → **401**、带 token → **200**（鉴权与闸门互不影响）；测完**立即 kill**，8795 已释放。
+- **为什么这条能根治"注入打到真机桌面"**：8790 是机器级 http.sys 端口，事故的成因不是"谁在调用"，而是"宿主 session 里也能起一个 helper 并把请求接走"。现在 helper 在任何宿主交互会话里都起不来（exit 9、不绑端口），除非显式加排障环境变量——**在进程/端口层面**堵死，而不是靠调用方自觉。
+- 编译：csc 零错误零警告；exe 24064 字节 @2026-10-02 10:56:08，SHA256 `A64BF5A5898464F7EA31DE06EA5924E64875F2426C38E64111BE560A1E35C3C8`。
+- 暂存目录：`dsh-vdesk-helper.exe` 被对方运行中的 helper 占用 → 按约定写入 `dsh-vdesk-helper.new.exe`（SHA256 与仓库一致），`.cs` 已同步；对方 stop 后下次 `vdesk.ps1 start` 会用仓库 helper\* 覆盖。
